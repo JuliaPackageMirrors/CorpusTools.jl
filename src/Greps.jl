@@ -1,7 +1,3 @@
-module Greps
-
-export Files, load_files, to_file, grep_count, grep_context
-
 
 # File Operations
 
@@ -38,6 +34,10 @@ type Files
         new(dir, names)
     end
 end
+
+#function join(Files f1, Files f2)
+#    catf1.names
+#    Files("", )
 
 # Helper functions
 
@@ -231,6 +231,4 @@ function grep_context(reg::Regex, files::Files, context=5, sep= "\t")
         close(f)
     end
     return strings
-end
-
 end

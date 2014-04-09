@@ -1,6 +1,4 @@
-module SimpleTokenizer
 
-export tokenize, detag
 
 function detag(text::String, reg=r"/.*? ", rep= " ")
     replace(text, reg, rep)
@@ -26,4 +24,3 @@ function tokenize(texts::Array{}, lang="es", punct=false)
     tokenize(join(texts, " "), lang, punct)
 end
 
-end

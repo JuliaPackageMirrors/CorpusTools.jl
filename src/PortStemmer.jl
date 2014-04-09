@@ -1,8 +1,5 @@
 #Implementation of the port stemmer algorithm in Julia
 
-module PortStemmer
-
-export stem
 
 # Type Word for containing the relevant indicess for the algorithm
 type Word
@@ -453,5 +450,4 @@ function stem(word)
     word = step5(word)
 
     return word.b[1:word.k]
-end
 end

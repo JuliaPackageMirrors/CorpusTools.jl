@@ -1,13 +1,9 @@
-module Collocations
+#include("SimpleTokenizer.jl")
 
-#include("SimpleTok.jl")
-#include("fisher.jl")
+#import SimpleTokenizer:tokenize
+#import Stats: fisher
 
 export collocations
-
-
-import SimpleTokenizer: tokenize
-import Stats: fisher
 
 type Collo
     word::Int64
@@ -153,6 +149,4 @@ function collocations(word::String, texts::Array{String}; test = "deltap",contex
     fin = collect(_test_colls(word, collo,p=p,test=test))
     #return fin
     sort([(b,a) for (a,b) in fin])
-end
-
 end

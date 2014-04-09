@@ -19,10 +19,6 @@
 ##
 ##############################################################################
 
-module Fisher
-
-export right_tail_p, left_tail_p, two_tail_p, Table
-
 function hypergeometric_pmf(x::Int64, m::Int64, n::Int64, k::Int64)
     #Given a population consisting of `m` items of class M and `n` items of class N,
     #this returns the probability of observing `x` items of class M when sampling
@@ -272,4 +268,3 @@ two_tail_p(arr::Array{Int64, 1}) = two_tail_p(totable(arr))
 
 two_tail_p(matr::Matrix) = two_tail_p(totable(matr))
 
-end

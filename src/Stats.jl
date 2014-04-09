@@ -1,6 +1,4 @@
-module Stats
 
-export fisher
 
 function fisher(a,b,c,d)
 
@@ -42,4 +40,3 @@ function fisher(a,b,c,d)
     return exp(logp)
 end
 
-end
