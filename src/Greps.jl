@@ -170,7 +170,7 @@ function grep_context(str::String, text::String, context=5, sep= "\t")
         start = max(2,indi[1]-context)
         ende = min(length(text), indi[end]+context)
         push!(strings, string(text[start:indi[1]-1],
-            sep,str,sep,text[indi[end]+1:ende]))
+            sep,str,sep,text[indi[end]:ende]))
     end
     return strings
 end
@@ -178,7 +178,7 @@ end
 function grep_context(str::String, list_texts::Array, context=5, sep="\t")
     strings = String[]
     for text in list_texts
-        cat(1, strings, grep_context(str, text, context, sep))
+        strings = cat(1, strings, grep_context(str, text, context, sep))
     end
     return strings
 end
@@ -188,7 +188,7 @@ function grep_context(str::String, files::Files, context=5, sep= "\t")
     for name in files.names
         f = open(name)
         for text in eachline(f)
-            cat(1,strings, grep_context(str, text, context, sep))
+            strings = cat(1,strings, grep_context(str, text, context, sep))
         end
         close(f)
     end
@@ -206,7 +206,7 @@ function grep_context(reg::Regex, text::String, context=5, sep= "\t")
         start = max(2, id-context)
         ende = min(length(text), idend+context)
 
-        push!(strings, string(text[start:id-1], sep, match.match, sep, text[idend+1:ende]))
+        push!(strings, string(text[start:id-1], sep, match.match, sep, text[idend:ende]))
     end
     return strings
 end
@@ -226,7 +226,7 @@ function grep_context(reg::Regex, files::Files, context=5, sep= "\t")
     for name in files.names
         f = open(name)
         for text in eachline(f)
-            cat(1,strings, grep_context(reg, text, context, sep))
+            strings = cat(1,strings, grep_context(reg, text, context, sep))
         end
         close(f)
     end

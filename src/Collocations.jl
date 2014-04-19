@@ -1,9 +1,4 @@
-#include("SimpleTokenizer.jl")
-
-#import SimpleTokenizer:tokenize
-#import Stats: fisher
-
-export collocations
+export collocations, collostruction
 
 type Collo
     word::Int64
@@ -21,6 +16,8 @@ type Collo
     end
 end
 
+
+
 function _table_freq(word::String, words::Array{String})
     total = 0
     for w in words
@@ -31,6 +28,8 @@ function _table_freq(word::String, words::Array{String})
     return total
 end
 
+
+#get collocations frequencies
 function _freq_colls(collo::Collo, word::String, words::Array{String}; context = 1, lower = true)
     counts=collo.counts
     counts_total=collo.counts_total
@@ -52,11 +51,13 @@ function _freq_colls(collo::Collo, word::String, words::Array{String}; context =
     for w in 1:total
         if word==words[w]
             word_c +=1
-            if (w+1 < total)
-                counts[words[w+1]] = get(counts,words[w+1],0)+1
-            end
-            if (w-1 > 1)
-                counts[words[w-1]] = get(counts,words[w-1],0)+1
+            for (i in 1:context)
+                if (w+i < total)
+                    counts[words[w+i]] = get(counts,words[w+i],0)+1
+                end
+                if (w-i > 1)
+                    counts[words[w-i]] = get(counts,words[w-i],0)+1
+                end
             end
         end
     end
@@ -78,6 +79,8 @@ function _freq_colls(collo::Collo, word::String, text::String; context = 1, lowe
     _freq_colls(collo, word, tokenize(text), context=context, lower=lower)
 end
 
+
+#function for adding dictionaries
 function _sum_dicts(d1::Dict{String, Int64},d2::Dict{String, Int64})
     total = Dict{String, Int64}()
     for key in keys(d1)
@@ -91,6 +94,7 @@ function _sum_dicts(d1::Dict{String, Int64},d2::Dict{String, Int64})
 end
 
 
+#add collocations
 function _sum (collos::Array{Collo})
     total = Collo()
     for c in collos
@@ -149,4 +153,29 @@ function collocations(word::String, texts::Array{String}; test = "deltap",contex
     fin = collect(_test_colls(word, collo,p=p,test=test))
     #return fin
     sort([(b,a) for (a,b) in fin])
+end
+
+
+###################
+#-----------------#
+#-Collostructions-#
+#-----------------#
+
+function collostruction(texts::Array{}, compare::Array{}, test="deltap")
+    words = [tokenize(text) for text in texts]
+    w_compare = [tokenize(text) for text in compare]
+
+    c_words::Dict{String, Int64}
+    c_compare::Dict{String, Int64}
+
+    for word in words
+        c_words[word] = _table_freq(word, words)
+    end
+
+    for word in w_compare
+        c_compare[word] = _table_freq(word, w_compare)
+    end
+
+
+
 end

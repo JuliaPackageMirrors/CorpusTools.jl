@@ -13,7 +13,8 @@ module CorpusTools
         tokenize,
         load_files,
         to_file,
-        fisher
+        fisher,
+        collostruction
 
 
 
