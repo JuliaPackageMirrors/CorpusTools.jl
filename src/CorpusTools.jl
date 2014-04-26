@@ -14,7 +14,8 @@ module CorpusTools
         load_files,
         to_file,
         fisher,
-        collostruction
+        collostruction,
+        grep_sentence
 
 
 

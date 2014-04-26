@@ -3,6 +3,8 @@
 
 # File type for reading direct from file
 
+#Search Directory and filter by extension
+
 type Files
     dir::String
     names::Array{}
@@ -10,27 +12,60 @@ type Files
     function Files(dir::String, names::Array{})
         new(dir, names)
     end
+
     function Files(names::Array{})
         dir = split(names[1], "/")[end]
         new(dir, names)
     end
-    function Files(dir::String)
+
+    # function Files(dir::String, filter="")
+    #     names = String[]
+
+    #     if endswith(dir,"/")
+    #         c(a,b) = string(a, b)
+    #     else
+    #         c(a,b) = string(a, "/", b)
+    #     end
+
+    #     try
+    #         ns = searchdir(dir,filter)
+    #         for name in ns
+    #             push!(names, c(dir, name))
+    #         end
+    #     catch
+    #         push!(names, dir)
+    #     end
+    #     new(dir, names)
+    # end
+
+    function Files(dir::String, filter=r"")
         names = String[]
+        dirs = String[]
+
+        push!(dirs,dir)
+
+        c(a,b) = string(a, "/", b)
+
         try
-            ns = readdir(dir)
+            readdir(dir)
+            while(length(dirs)>0)
+                d = pop!(dirs)
+                try
+                    ns = readdir(d)
+                    for name in ns
+                        push!(dirs, c(d, name))
+                    end
+                catch
+                    if ismatch(filter,d)
+                        push!(names, d)
+                    end
+                end
 
-            if endswith(dir,"/")
-                c(a,b) = string(a, b)
-            else
-                c(a,b) = string(a, "/", b)
-            end
-
-            for name in ns
-                push!(names, c(dir, name))
             end
         catch
             push!(names, dir)
         end
+
         new(dir, names)
     end
 end
@@ -231,4 +266,31 @@ function grep_context(reg::Regex, files::Files, context=5, sep= "\t")
         close(f)
     end
     return strings
+end
+
+########
+# Extract sentences containing...
+########
+
+function grep_sentence(reg::Regex, files::Files, tagging="non")
+    strings = String[]
+
+    if tagging =="slash"
+
+    elseif tagging =="xml"
+
+    else
+        for name in files.names
+            f = open(name)
+            for text in eachline(f)
+                if (ismatch(reg, text))
+                    push!(strings, text)
+                end
+            end
+            close(f)
+        end
+    end
+    return strings
+
+
 end
