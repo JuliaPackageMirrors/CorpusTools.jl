@@ -205,7 +205,7 @@ function grep_context(str::String, text::String, context=5, sep= "\t")
         start = max(2,indi[1]-context)
         ende = min(length(text), indi[end]+context)
         push!(strings, string(text[start:indi[1]-1],
-            sep,str,sep,text[indi[end]:ende]))
+            sep,str,sep,text[indi[end]+1:ende]))
     end
     return strings
 end
@@ -291,6 +291,24 @@ function grep_sentence(reg::Regex, files::Files, tagging="non")
         end
     end
     return strings
+end
 
+#taking an array of sentences
+function grep_sentence(reg::Regex, texts::Array{}, tagging="non")
+    strings = String[]
+
+    if tagging =="slash"
+
+    elseif tagging =="xml"
+
+    else
+        for text in texts
+            if (ismatch(reg, text))
+                push!(strings, text)
+            end
+        end
+        
+    end
+    return strings
 
 end
