@@ -17,7 +17,7 @@ function tokenize(text::String, lang="es", punct=false)
     #Simple tokenizer
     str = replace(text, r"[,.;:.'\"!¡?¿_\n/\t\(\)\{\}\[\]-]", " ")
     str = replace(str, r" +", " ")
-    str = replace(str, r" $","")
+    str = strip(str)
     str = split(str, " ")
 end
 
@@ -42,4 +42,3 @@ function word_count(files::Files; verbose = false)
     end
     return counts
 end
-

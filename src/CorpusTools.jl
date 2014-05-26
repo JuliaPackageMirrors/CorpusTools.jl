@@ -15,7 +15,7 @@ module CorpusTools
         to_file,
         fisher,
         collostruction,
-        grep_sentence,
+        get_sentences,
         word_count
 
 

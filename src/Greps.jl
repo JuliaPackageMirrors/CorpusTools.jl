@@ -198,7 +198,7 @@ end
 
 # With simple strings
 
-function grep_context(str::String, text::String, context=5, sep= "\t")
+function grep_context(str::String, text::String, context=5, sep=" ")
     strings = String[]
     hits = _search_all(str, text)
     for indi in hits
@@ -210,7 +210,7 @@ function grep_context(str::String, text::String, context=5, sep= "\t")
     return strings
 end
 
-function grep_context(str::String, list_texts::Array, context=5, sep="\t")
+function grep_context(str::String, list_texts::Array, context=5, sep=" ")
     strings = String[]
     for text in list_texts
         strings = cat(1, strings, grep_context(str, text, context, sep))
@@ -218,7 +218,7 @@ function grep_context(str::String, list_texts::Array, context=5, sep="\t")
     return strings
 end
 
-function grep_context(str::String, files::Files, context=5, sep= "\t")
+function grep_context(str::String, files::Files, context=5, sep= " ")
     strings = String[]
     for name in files.names
         f = open(name)
@@ -232,7 +232,7 @@ end
 
 # With regular expresions
 
-function grep_context(reg::Regex, text::String, context=5, sep= "\t")
+function grep_context(reg::Regex, text::String, context=5, sep= " ")
     # Grep from a single string of text
     strings = String[]
     for match in eachmatch(reg, text)
@@ -246,7 +246,7 @@ function grep_context(reg::Regex, text::String, context=5, sep= "\t")
     return strings
 end
 
-function grep_context(reg::Regex, list_texts::Array, context=5, sep= "\t")
+function grep_context(reg::Regex, list_texts::Array, context=5, sep=" ")
     # Grep read from a list of strings
     strings = String[]
     for text in list_texts
@@ -255,7 +255,7 @@ function grep_context(reg::Regex, list_texts::Array, context=5, sep= "\t")
     return strings
 end
 
-function grep_context(reg::Regex, files::Files, context=5, sep= "\t")
+function grep_context(reg::Regex, files::Files, context=5, sep=" ")
     # Grep from a list of files
     strings = String[]
     for name in files.names
@@ -272,19 +272,27 @@ end
 # Extract sentences containing...
 ########
 
-function grep_sentence(reg::Regex, files::Files, tagging="non")
+function get_sentences(reg::Regex, files::Files, tagging="non")
     strings = String[]
 
-    if tagging =="slash"
-
-    elseif tagging =="xml"
-
+    if tagging =="xml"
+        for name in files.names
+            text = readall(open(name))
+            text = replace(text, r"<\?.*?\?>", "")
+            text = replace(text, r"<header>.*?</header>", "")
+            lines = split(text, r"(?=<s)")
+            for string in lines
+                if (ismatch(reg, string))
+                    strings = cat(1,strings, string)
+                end
+            end
+        end
     else
         for name in files.names
             f = open(name)
-            for text in eachline(f)
-                if (ismatch(reg, text))
-                    push!(strings, text)
+            for string in eachline(f)
+                if (ismatch(reg, string))
+                    strings = cat(1,strings, string)
                 end
             end
             close(f)
@@ -294,7 +302,7 @@ function grep_sentence(reg::Regex, files::Files, tagging="non")
 end
 
 #taking an array of sentences
-function grep_sentence(reg::Regex, texts::Array{}, tagging="non")
+function get_sentences(reg::Regex, texts::Array{}, tagging="non")
     strings = String[]
 
     if tagging =="slash"
@@ -307,7 +315,7 @@ function grep_sentence(reg::Regex, texts::Array{}, tagging="non")
                 push!(strings, text)
             end
         end
-        
+
     end
     return strings
 
