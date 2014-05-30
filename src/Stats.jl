@@ -40,3 +40,12 @@ function fisher(a,b,c,d)
     return exp(logp)
 end
 
+function deltap(a,b,c,d)
+    pv1 = (a/(a+b))-(c/(c+d))
+    pv2 = (a/(a+c))-(c/(b+d))
+    #key1 = string(word, " -> ",pr)
+    #key2 = string(pr, " -> ", word)
+    #pvalues[key1] = pv1
+    #pvalues[key2] = pv2
+    return (pv1, pv2)
+end

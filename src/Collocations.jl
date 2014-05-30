@@ -1,11 +1,17 @@
+using DataFrames
+
 export collocations, collostruction
 
+
+#internal type for collocation
 type Collo
     word::Int64
-    counts::Dict{String, Int64}
-    counts_total::Dict{String, Int64}
-    set::Set{String}
-    total::Int64
+    counts::Dict{String, Int64} #counts of each collexeme when appearing with the node
+    counts_total::Dict{String, Int64} #total counts of each collexeme
+    set::Set{String} #set of collexemes
+    total::Int64 #grand total of words
+
+    #initialize it
     function Collo()
         new(0,Dict{String,Int64}(),Dict{String,Int64}(),Set{String}(), 0)
     end
@@ -16,7 +22,10 @@ type Collo
     end
 end
 
-
+#internal type for storing collocations
+type Collocation
+    table = String{}
+end
 
 function _table_freq(word::String, words::Array{String})
     total = 0
@@ -36,19 +45,16 @@ function _freq_colls(collo::Collo, word::String, words::Array{String}; context =
     word_c=collo.word
     set = collo.set
 
-    #println(counts)
-    #println(counts_total)
-    #println(word_c)
-
-
     # Make lower
     if lower == true
         map!((x) -> lowercase(x), words)
     end
 
+    #total number of words
     total = length(words)
 
-    for w in 1:total
+    #iterate and get counts from file
+    for w in 1:total #Store in w each word
         if word==words[w]
             word_c +=1
             for (i in 1:context)
@@ -62,12 +68,12 @@ function _freq_colls(collo::Collo, word::String, words::Array{String}; context =
         end
     end
 
+    #set of words
     for key in keys(counts)
         push!(set, key)
         for w in words
             if w ==key
                 counts_total[key] = get(counts_total,key,0)+1
-                #count((x)->x==key, words)
             end
         end
     end
@@ -107,52 +113,77 @@ function _sum (collos::Array{Collo})
     return total
 end
 
-function _test_colls(word::String, collos::Collo; p = 0.01, test ="deltap")
-    pvalues = Dict{String, Float64}()
+function _test_colls(word::String, collos::Collo; test ="deltap")
 
+
+    #Returns DataFrame
+    df = DataFrame()
+
+    #Vectors for storing nodes, collocations and pvalues
+    word_pr = Float64[]
+    pr_word = Float64[]
+    fisher_values = Float64[]
+    word_list = String[]
+    pr_list = String[]
+
+println("\nEvaluating colocations: $(length(keys(collos.counts)))")
+    i = 0
     for pr in keys(collos.counts)
+        print("$(i)-");i +=1;
+
         a = collos.counts[pr]
-        b = collos.word-a
-        c = collos.counts_total[pr]-a
-        d = collos.total-a-b-c
+        c = collos.word-a
+        b = collos.counts_total[pr]-a
+        d= collos.total-b-a-c
 
+        pv1,pv2 = deltap(a,b,c,d)
+        push!(word_pr, pv1)
+        push!(pr_word, pv2)
 
-
-        if test =="deltap"
-            pv1 = a/(a+b)-c/(c+d)
-            pv2 = a/(a+c)-c/(b+d)
-            key1 = string(word, " -> ",pr)
-            key2 = string(pr, " -> ", word)
-            pvalues[key1] = pv1
-            pvalues[key2] = pv2
+        #get fisher values
+        if a*b*c*d != 0
+            fv = fisher(a,b,c,d)
+            push!(fisher_values, fv)
+        else
+            push!(fisher_values, 1)
         end
-        if test =="fisher"
-            if a*b*c*d != 0
-                pv = fisher(a,b,c,d)
-                pvalues[pr] = pv
-            end
-        end
+
+        push!(word_list, word)
+        push!(pr_list, pr)
+
     end
 
-    return pvalues
+    #builds DataFrame
+    df["fisher p"]=fisher_values
+    df["word -> colexeme"]=word_pr
+    df["colexeme -> word"]=pr_word
+    df["word"]=word
+    df["colexeme"]=pr_list
+    return df
 end
 
-function collocations(word::String, text::String; test = "deltap", context = 1,p=0.01, lower=true)
-    fin = collect(_test_colls(word, _freq_colls(Collo(), word, text, context, lower), p, test))
-    #return fin
-    sort([(b,a) for (a,b) in fin])
+function collocations(word::String, text::String; test = "deltap", context = 1, lower=true)
+    fin = _test_colls(word, _freq_colls(Collo(), word, text, context= context, lower=lower), test=test)
+    return sort(fin)
+    #sort([(b,a) for (a,b) in fin])
 end
 
-function collocations(word::String, texts::Array{String}; test = "deltap",context = 1, p=0.01, lower=true)
+function collocations(word::String, texts::Array{String}; test = "deltap",context = 1, lower=true)
     collo = Collo()
 
+    i = 0
+    println("Extracting colexemes: $(length( texts)))")
     for text in texts
+        print("$(i)-"); i +=1
+
         collo = _freq_colls(collo,word, text, context=context, lower=lower)
     end
 
-    fin = collect(_test_colls(word, collo,p=p,test=test))
-    #return fin
-    sort([(b,a) for (a,b) in fin])
+    fin = _test_colls(word, collo,test=test)
+    return sort(fin)
+    #sort([(b,a) for (a,b) in fin])
+
+
 end
 
 

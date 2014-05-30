@@ -16,10 +16,11 @@ module CorpusTools
         fisher,
         collostruction,
         get_sentences,
-        word_count
+        word_count,
+        deltap
 
 
-
+    include("Files.jl")
     include("Greps.jl")
     include("Fisher.jl")
     include("SimpleTokenizer.jl")
