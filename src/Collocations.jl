@@ -122,43 +122,70 @@ function _test_colls(word::String, collos::Collo; test ="deltap")
     #Vectors for storing nodes, collocations and pvalues
     word_pr = Float64[]
     pr_word = Float64[]
-    fisher_values = Float64[]
+    p_values = Float64[]
     word_list = String[]
     pr_list = String[]
+    freq = Int64[]
+    odds = Float64[]
 
 println("\nEvaluating colocations: $(length(keys(collos.counts)))")
     i = 0
     for pr in keys(collos.counts)
-        print("$(i)-");i +=1;
+        print("$(i)-");
 
         a = collos.counts[pr]
         c = collos.word-a
         b = collos.counts_total[pr]-a
         d= collos.total-b-a-c
 
+        push!(freq, a)
+
         pv1,pv2 = deltap(a,b,c,d)
         push!(word_pr, pv1)
         push!(pr_word, pv2)
 
         #get fisher values
-        if a*b*c*d != 0
-            fv = fisher(a,b,c,d)
-            push!(fisher_values, fv)
+        if a*b*c*d > 1000
+            fv = chisq(a,b,c,d)
+            push!(p_values, fv)
+            odds_ratio = (a/b)/(c/d)
+
+        elseif a*b*c*d > 0
+
+            try
+                fv = fisher(a,b,c,d)
+                push!(p_values, fv)
+            catch
+                push!(p_values, 0)
+            end
+
+            odds_ratio = (a/b)/(c/d)
+
         else
-            push!(fisher_values, 1)
+            odds_ratio = 0
+            push!(p_values, 1)
         end
+
+        push!(odds,odds_ratio)
+
 
         push!(word_list, word)
         push!(pr_list, pr)
 
+        i +=1;
+
     end
 
+
     #builds DataFrame
-    df["fisher p"]=fisher_values
+
+    df["p value"]=p_values
+    df["odds ratio"]=odds
     df["word -> colexeme"]=word_pr
     df["colexeme -> word"]=pr_word
     df["word"]=word
     df["colexeme"]=pr_list
+    df["frequency"]=freq
     return df
 end
 

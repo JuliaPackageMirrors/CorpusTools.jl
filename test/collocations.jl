@@ -6,7 +6,7 @@ files2 = load_files(Files("/home/matias/Documentos/Corpora/Inglés/brown/raw2/ca
 
 #dir_out = "/home/matias/Documentos/Corpora/Inglés/brown/raw2/";
 
-collos = collocations("house", files);
+collos = collocations("coffee", files);
 println(head(collos))
 
 writetable("/home/matias/Documentos/temp/collos1.txt", collos, separator='\t', header=true);

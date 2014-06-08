@@ -196,7 +196,7 @@ end
 # Extract sentences containing...
 ########
 
-function get_sentences(reg::Regex, files::Files, tagging="non")
+function get_sentences(reg::Regex, files::Files, tagging="non"; sep = "<s")
     strings = String[]
 
     if tagging =="xml"
@@ -204,7 +204,7 @@ function get_sentences(reg::Regex, files::Files, tagging="non")
             text = readall(open(name))
             text = replace(text, r"<\?.*?\?>", "")
             text = replace(text, r"<header>.*?</header>", "")
-            lines = split(text, r"(?=<s)")
+            lines = split(text, r"(?=$(sep))")
             for string in lines
                 if (ismatch(reg, string))
                     strings = cat(1,strings, string)
@@ -226,7 +226,7 @@ function get_sentences(reg::Regex, files::Files, tagging="non")
 end
 
 #taking an array of sentences
-function get_sentences(reg::Regex, texts::Array{}, tagging="non")
+function get_sentences(reg::Regex, texts::Array{}; tagging="non")
     strings = String[]
 
     if tagging =="slash"

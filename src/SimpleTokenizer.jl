@@ -1,10 +1,10 @@
 
 
-function detag(text::String, reg=r"/.*? ", rep= " ")
+function detag(text::String, reg=r"/.*? ", rep= "")
     replace(text, reg, rep)
 end
 
-function detag(texts::Array{}, reg= r"/.*? ", rep= " ")
+function detag(texts::Array{}, reg= r"/.*? ", rep= "")
     #remove tags
     strings= String[]
     for text in texts

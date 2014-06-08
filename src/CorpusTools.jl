@@ -17,7 +17,8 @@ module CorpusTools
         collostruction,
         get_sentences,
         word_count,
-        deltap
+        deltap,
+        chisq
 
 
     include("Files.jl")

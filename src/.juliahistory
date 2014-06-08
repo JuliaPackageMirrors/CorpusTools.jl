@@ -1,3 +1,32 @@
 "esta es una pr12"[end-4:]
 
 "esta es una pr12"[end-3:]
+end
+split("hola mundo ", " ")
+splittext("hola mundo ", " ")
+splitext("hola mundo ", " ")
+8:1
+for a in 8:1
+print (a)
+end
+ a
+1:8
+a in 1:8
+for a in 1:8
+print(a)
+end
+for a in 8:1
+print(a)
+end
+for a in inverse(1:8)
+print(a)
+end
+for a in reverse(1:8)
+print(a)
+end
+"hola" in ["hola", "adios", "mañana"]
+"hola" in ["hol", "adios", "mañana"]
+ a = Bool[]
+push! (a, true)
+push! (a, true)
+push! (a, true)

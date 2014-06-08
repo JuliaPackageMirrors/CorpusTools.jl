@@ -49,3 +49,22 @@ function deltap(a,b,c,d)
     #pvalues[key2] = pv2
     return (pv1, pv2)
 end
+
+function chisq(a::Int64,b::Int64,c::Int64,d::Int64)
+
+    _jl_libRmath = dlopen("libRmath")
+    pchisq(q::Number, df::Number, lower_tail::Bool, log_p::Bool) =
+        ccall(dlsym(_jl_libRmath,:pchisq),Float64,(Float64,Float64,Int32,Int32), q, df, lower_tail, log_p)
+
+    total = a+b+c+d
+    e_a = (a+b)*(a+c)/total
+    e_b = (b+a)*(b+d)/total
+    e_c = (c+a)*(c+d)/total
+    e_d = (d+c)*(d+b)/total
+    chi = ((a-e_a)^2)/e_a + ((b-e_b)^2)/e_b + ((c-e_c)^2)/e_c + ((d-e_d)^2)/e_d
+
+    #println(chi)
+
+    return -chi#pchisq(chi, 1, false, false)
+
+end
