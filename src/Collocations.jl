@@ -39,7 +39,7 @@ end
 
 
 #get collocations frequencies
-function _freq_colls(collo::Collo, word::String, words::Array{String}; context = 1, lower = true)
+function _freq_colls(collo::Collo, word::String, words::Array{String}; span = 1, lower = true)
     counts=collo.counts
     counts_total=collo.counts_total
     word_c=collo.word
@@ -57,7 +57,7 @@ function _freq_colls(collo::Collo, word::String, words::Array{String}; context =
     for w in 1:total #Store in w each word
         if word==words[w]
             word_c +=1
-            for (i in 1:context)
+            for (i in 1:span)
                 if (w+i < total)
                     counts[words[w+i]] = get(counts,words[w+i],0)+1
                 end
@@ -81,8 +81,8 @@ function _freq_colls(collo::Collo, word::String, words::Array{String}; context =
     return Collo(word_c, counts,counts_total, set, total+collo.total)
 end
 
-function _freq_colls(collo::Collo, word::String, text::String; context = 1, lower = true)
-    _freq_colls(collo, word, tokenize(text), context=context, lower=lower)
+function _freq_colls(collo::Collo, word::String, text::String; span = 1, lower = true)
+    _freq_colls(collo, word, tokenize(text), span=span, lower=lower)
 end
 
 
@@ -189,13 +189,13 @@ println("\nEvaluating colocations: $(length(keys(collos.counts)))")
     return df
 end
 
-function collocations(word::String, text::String; test = "deltap", context = 1, lower=true)
-    fin = _test_colls(word, _freq_colls(Collo(), word, text, context= context, lower=lower), test=test)
+function collocations(word::String, text::String; test = "deltap", span = 1, lower=true)
+    fin = _test_colls(word, _freq_colls(Collo(), word, text, span= span, lower=lower), test=test)
     return sort(fin)
     #sort([(b,a) for (a,b) in fin])
 end
 
-function collocations(word::String, texts::Array{String}; test = "deltap",context = 1, lower=true)
+function collocations(word::String, texts::Array{String}; test = "deltap",span = 1, lower=true)
     collo = Collo()
 
     i = 0
@@ -203,7 +203,7 @@ function collocations(word::String, texts::Array{String}; test = "deltap",contex
     for text in texts
         print("$(i)-"); i +=1
 
-        collo = _freq_colls(collo,word, text, context=context, lower=lower)
+        collo = _freq_colls(collo,word, text, span=span, lower=lower)
     end
 
     fin = _test_colls(word, collo,test=test)

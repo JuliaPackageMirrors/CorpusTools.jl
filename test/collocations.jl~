@@ -1,7 +1,0 @@
-using CorpusTools
-
-files = loadfiles(Files("/home/matias/Documentos/Corpora/Inglés/brown/raw/"))
-
-collos = collocations("man", files)
-
-to_file(collos, "collos.txt")
