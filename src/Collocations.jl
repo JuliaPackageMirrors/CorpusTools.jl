@@ -16,6 +16,7 @@ type Collo
         new(0,Dict{String,Int64}(),Dict{String,Int64}(),Set{String}(), 0)
     end
 
+    #initializes with counts already there
     function Collo(word::Int64,counts::Dict{String,Int64}, counts_total::Dict{String,Int64}, set::Set{String},
         total::Int64)
         new(word, counts, counts_total, set,total)
@@ -45,17 +46,20 @@ function _freq_colls(collo::Collo, word::String, words::Array{String}; span = 1,
     word_c=collo.word
     set = collo.set
 
-    # Make lower
-    if lower == true
-        map!((x) -> lowercase(x), words)
+    #Get lower case
+    if lower
+        mapl(wd) = lowercase(wd)
+    else
+        mapl(wd) = wd
     end
+
 
     #total number of words
     total = length(words)
 
     #iterate and get counts from file
     for w in 1:total #Store in w each word
-        if word==words[w]
+        if word==mapl(words[w])
             word_c +=1
             for (i in 1:span)
                 if (w+i < total)
