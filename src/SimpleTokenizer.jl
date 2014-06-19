@@ -13,16 +13,32 @@ function detag(texts::Array{}, reg= r"/.*? ", rep= "")
     return strings
 end
 
-function tokenize(text::String, lang="es", punct=false)
+function tokenize(text::String; lang="es", punct=false)
     #Simple tokenizer
-    str = replace(text, r"[,.;:.'\"!¡?¿_\n/\t\(\)\{\}\[\]-]", " ")
-    str = replace(str, r" +", " ")
-    str = strip(str)
-    str = split(str, " ")
+    if lang=="es"
+        return(tokenizeEs(text, punct))
+    end
 end
 
-function tokenize(texts::Array{}, lang="es", punct=false)
-    tokenize(join(texts, " "), lang, punct)
+function tokenizeEs(text::String, punct=false)
+    if punct
+        str = strip(text)
+        str = split(str, r"((?<=[,\.;:'\"!¡?¿_\n/\t\(\)\{\}\[\]\- ]) *)|((?=[,\.;:'\"!¡?¿_\n/\t\(\)\{\}\[\]\- ]) ?)")
+
+    else
+        str = strip(text)
+        str = replace(str, r"[,\.;:'\"!¡?¿_\n/\t\(\)\{\}\[\]\- ]+", "<!%")
+        str = split(str,"<!%")
+    end
+    return str
+end
+
+function tokenize(texts::Array{}; lang="es", punct=false)
+    tokens = Array{String}[]
+    for text in texts
+        push!(tokens,tokenize(text, lang=lang, punct = punct))
+    end
+    return tokens
 end
 
 
@@ -31,6 +47,15 @@ end
 function word_count(text::String)
     return(length(tokenize(text)))
 end
+
+function word_count(texts::Array{})
+    N = Int64[]
+    for text in texts
+        push!(N, length(tokenize(text)))
+    end
+    return N
+end
+
 
 function word_count(files::Files; verbose = false)
     counts = Float64[]

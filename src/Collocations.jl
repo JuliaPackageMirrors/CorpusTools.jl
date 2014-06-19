@@ -183,7 +183,7 @@ println("\nEvaluating colocations: $(length(keys(collos.counts)))")
 
     #builds DataFrame
 
-    df["p value"]=p_values
+    df["Chi squared"]=p_values
     df["odds ratio"]=odds
     df["word -> colexeme"]=word_pr
     df["colexeme -> word"]=pr_word
@@ -196,7 +196,6 @@ end
 function collocations(word::String, text::String; test = "deltap", span = 1, lower=true)
     fin = _test_colls(word, _freq_colls(Collo(), word, text, span= span, lower=lower), test=test)
     return sort(fin)
-    #sort([(b,a) for (a,b) in fin])
 end
 
 function collocations(word::String, texts::Array{String}; test = "deltap",span = 1, lower=true)
@@ -212,8 +211,6 @@ function collocations(word::String, texts::Array{String}; test = "deltap",span =
 
     fin = _test_colls(word, collo,test=test)
     return sort(fin)
-    #sort([(b,a) for (a,b) in fin])
-
 
 end
 
