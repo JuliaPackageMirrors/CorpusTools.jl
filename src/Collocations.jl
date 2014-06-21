@@ -48,9 +48,7 @@ function _freq_colls(collo::Collo, word::String, words::Array{String}; span = 1,
 
     #Get lower case
     if lower
-        mapl(wd) = lowercase(wd)
-    else
-        mapl(wd) = wd
+        words = map(lowercase, words)
     end
 
 
@@ -59,7 +57,7 @@ function _freq_colls(collo::Collo, word::String, words::Array{String}; span = 1,
 
     #iterate and get counts from file
     for w in 1:total #Store in w each word
-        if word==mapl(words[w])
+        if word==words[w]
             word_c +=1
             for (i in 1:span)
                 if (w+i < total)
@@ -75,11 +73,7 @@ function _freq_colls(collo::Collo, word::String, words::Array{String}; span = 1,
     #set of words
     for key in keys(counts)
         push!(set, key)
-        for w in words
-            if w ==key
-                counts_total[key] = get(counts_total,key,0)+1
-            end
-        end
+        counts_total[key] = get(counts_total,key,0)+count(x-> x ==key, words)
     end
 
     return Collo(word_c, counts,counts_total, set, total+collo.total)
@@ -117,7 +111,7 @@ function _sum (collos::Array{Collo})
     return total
 end
 
-function _test_colls(word::String, collos::Collo; test ="deltap")
+function _test_colls(word::String, collos::Collo; test ="chisq")
 
 
     #Returns DataFrame
@@ -132,7 +126,8 @@ function _test_colls(word::String, collos::Collo; test ="deltap")
     freq = Int64[]
     odds = Float64[]
 
-println("\nEvaluating colocations: $(length(keys(collos.counts)))")
+    println("\nEvaluating colocations: $(length(keys(collos.counts)))")
+
     i = 0
     for pr in keys(collos.counts)
         print("$(i)-");
@@ -148,29 +143,31 @@ println("\nEvaluating colocations: $(length(keys(collos.counts)))")
         push!(word_pr, pv1)
         push!(pr_word, pv2)
 
-        #get fisher values
-        if a*b*c*d > 1000
-            fv = chisq(a,b,c,d)
-            push!(p_values, fv)
-            odds_ratio = (a/b)/(c/d)
+        #get association values
 
-        elseif a*b*c*d > 0
+        if a*b*c*d > 0
 
-            try
-                fv = fisher(a,b,c,d)
+            if test =="fisher"
+                try
+                    fv = fisher(a,b,c,d)
+                    push!(p_values, fv)
+                catch
+                    push!(p_values, 0)
+                end
+            elseif test=="chisq"
+                fv = chisq(a,b,c,d)
                 push!(p_values, fv)
-            catch
-                push!(p_values, 0)
+                odds_ratio = (a/b)/(c/d)
             end
 
-            odds_ratio = (a/b)/(c/d)
+            odds_ratio = logl(a,b,c,d)
 
         else
-            odds_ratio = 0
+            odds_ratio = 1
             push!(p_values, 1)
         end
 
-        push!(odds,odds_ratio)
+        push!(odds,log(odds_ratio))
 
 
         push!(word_list, word)
@@ -184,7 +181,7 @@ println("\nEvaluating colocations: $(length(keys(collos.counts)))")
     #builds DataFrame
 
     df["Chi squared"]=p_values
-    df["odds ratio"]=odds
+    df["Log Odds ratio"]=odds
     df["word -> colexeme"]=word_pr
     df["colexeme -> word"]=pr_word
     df["word"]=word
@@ -193,24 +190,14 @@ println("\nEvaluating colocations: $(length(keys(collos.counts)))")
     return df
 end
 
-function collocations(word::String, text::String; test = "deltap", span = 1, lower=true)
+function collocations(word::String, text::String; test = "chisq", span = 1, lower=true)
     fin = _test_colls(word, _freq_colls(Collo(), word, text, span= span, lower=lower), test=test)
     return sort(fin)
 end
 
-function collocations(word::String, texts::Array{String}; test = "deltap",span = 1, lower=true)
-    collo = Collo()
-
-    i = 0
-    println("Extracting colexemes: $(length( texts)))")
-    for text in texts
-        print("$(i)-"); i +=1
-
-        collo = _freq_colls(collo,word, text, span=span, lower=lower)
-    end
-
-    fin = _test_colls(word, collo,test=test)
-    return sort(fin)
+function collocations(word::String, texts::Array{String}; test = "chisq",span = 1, lower=true)
+    text =join(texts, "\n")
+    return collocations(word,text; test=test,span=span,lower=lower)
 
 end
 
@@ -220,7 +207,7 @@ end
 #-Collostructions-#
 #-----------------#
 
-function collostruction(texts::Array{}, compare::Array{}, test="deltap")
+function collostruction(texts::Array{}, compare::Array{}, test="chisq")
     words = [tokenize(text) for text in texts]
     w_compare = [tokenize(text) for text in compare]
 

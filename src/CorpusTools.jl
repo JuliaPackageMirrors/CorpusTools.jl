@@ -18,7 +18,8 @@ module CorpusTools
         get_sentences,
         word_count,
         deltap,
-        chisq
+        chisq,
+        logl
 
 
     include("Files.jl")
