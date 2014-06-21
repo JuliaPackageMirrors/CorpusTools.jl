@@ -58,12 +58,12 @@ end
 
 
 function word_count(files::Files; verbose = false)
-    counts = Float64[]
+    N = Int64[]
     for name in files.names
         if verbose
             println(string("Reading: ", name))
         end
-        push!(counts, word_count(readall(open(name))))
+        push!(N, word_count(readall(open(name))))
     end
-    return counts
+    return N
 end

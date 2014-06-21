@@ -13,7 +13,7 @@ function fisher(a,b,c,d)
     t = a
     C = a+b
     T = a+c
-    G = a+b+c+d
+    G = max(a+b+c+d,1000000) #it defaults to N = 1e6 if it becomes too large
 
     logftable=log(0:G)
     logftable[1]=0
