@@ -10,7 +10,7 @@ type Word
 end
 
 function stem(s::String)
-    if length(s)>3
+    if length(s)>2
         return stem(Word(s, 1, length(s),0))
     else
         return s
@@ -46,7 +46,7 @@ function m (word::Word)
     # ....
 
     n = 0
-    i = 1
+    i = word.k0
     while true
         if i > word.j
             return n
@@ -69,7 +69,7 @@ function m (word::Word)
             i +=1
         end
         i +=1
-        n += 1
+        n +=1
 
         while true
             if i > word.j
@@ -138,15 +138,12 @@ function ends(word::Word, s::String)
         return false
     end
 
-
     if word.b[word.k-len+1:word.k]!=s
 
         return false
     end
 
-
     word.j =word.k-len
-
 
     return true#, word
 end
@@ -180,25 +177,19 @@ function step1ab(word::Word)
         end
     end
     if ends(word, "eed")
-        if m(word)>1
+        if m(word)>0
             word.k -=1
         end
-    elseif (ends(word, "ed") || ends(word, "ing") && vowelinstem(word))
+    elseif ((ends(word, "ed") || ends(word, "ing")) && vowelinstem(word))
         # ("sí!")
         word.k = word.j
-
-
         if ends(word, "at")
-
             setto(word, "ate")
         elseif ends(word, "bl")
-
             setto(word, "ble")
         elseif ends(word,"iz")
-
             setto(word, "ize")
         elseif (doublec(word, word.k))
-
             word.k -=1
             ch = word.b[word.k]
             if (ch =='l' || ch =='s' || ch =='z')
@@ -215,8 +206,9 @@ end
 function step1c(word)
     # step1c(word) turns terminal y to i when there is another vowel in the stem.
     if (ends(word, "y") && vowelinstem(word))
-        word.b = string(word.b[1:word.k],'i', word.b[word.k+1:end])
+        word.b = string(word.b[1:word.k-1],'i', word.b[word.k+1:end])
     end
+
     return word
 end
 
@@ -237,7 +229,7 @@ function step2(word)
         end
     elseif word.b[word.k-1]=='c'
         if ends(word, "enci")
-            word = r(word, "are")
+            word = r(word, "ence")
         elseif ends(word, "anci")
             word = r(word, "ance")
         end
@@ -335,6 +327,8 @@ function step4(word)
     elseif word.b[word.k-1]=='c'
         if ends(word, "ance")
 
+        elseif ends(word, "ence")
+
         else
             return word
         end
@@ -365,7 +359,7 @@ function step4(word)
 
         elseif ends(word, "ment")
 
-        elseif ends(word, "endt")
+        elseif ends(word, "ent")
 
         else
             return word
@@ -413,6 +407,7 @@ function step4(word)
     else
         return word
     end
+
     if m(word)>1
         word.k = word.j
     end
@@ -440,7 +435,6 @@ function stem(word)
     # to the last character of a string, (p[j+1]=='\0'). The stemmer adjusts
     # the characters p[i] ... p[j] and returns the new end-point of the string,
     # k. Stemming never increases word length, so i <= k <= j.
-
 
     word = step1ab(word)
     word = step1c(word)
